@@ -9,45 +9,44 @@
 #include <vector>
 #include <set>
 #include <cmath>
-
+#include<algorithm>
 using namespace std;
 
 class Player {
 public:
-	int id;
+	int m_id;
 	string m_name;
 	int m_elo;
 };
 
 class Team {
 private:
-	set<Player> ids;
+	vector<int> ids;
 	int m_team_elo;
-
 public:
 	int var = 0;
-	int change_players() {
-		//iterate over the players and change their elo accordingly
-		//i.e. player1.m_elo += var
+	int change_players(map<int,Player> &players) {
+		for (int i : ids) //iterate over the players and change their elo accordingly
+			players[i].m_elo += var;
 		var = 0;
 		return 0;
 	};
 	int elo() { return m_team_elo; };
-	set<Player> members() { return ids;};
-	int remove(const Player &p) {
-		ids.erase(p);
-		m_team_elo -= p.m_elo;
-		return 0;
-	}
+	vector<int> members() { return ids;};
 	float get_we(Team &opponent) {
 		int dr = m_team_elo - opponent.elo();
-		return 1/((10^(-dr/400)+1));
-	}
-	int add(const Player &p) {
+		return 1 / ((10 ^ (-dr / 400) + 1));
+	};
+	int remove_p(const Player &p) {
+		ids.erase(std::remove(ids.begin(), ids.end(), p.m_id), ids.end());
+		m_team_elo -= p.m_elo;
+		return 0;
+	};
+	int add_p(const Player &p) {
 		if (ids.size() > 5) 
 			return 1;
 		else 
-			ids.insert(p);
+			ids.push_back(p.m_id);
 			m_team_elo += p.m_elo;
 		return 0;
 	};
@@ -66,14 +65,10 @@ public:
 		TeamB.first = B;
 		TeamB.second = Gb;
 
-		if (Ga = Gb) W = 0.5;
-		else W = Ga > Gb ? 1 : 0;
-
+		W = Ga > Gb ? 1 : Ga = Gb ? 0.5 : 0;
 		short r;
 		r = abs(Ga - Gb);
-		if (r==2) K*=1.5;
-		if (r==3) K*=1.75;
-		else if (r>3) K *= 1+0.75+(r-3)/8;		
+		K *= r < 2 ? 1 : r == 2 ? 1.5 : r == 3 ? 1.75 : 1 + 0.75 + (r - 3) / 8;
 	};
 	pair<Team, Team> teams() {
 		return pair<Team,Team> (TeamA.first,TeamB.first);
@@ -113,7 +108,7 @@ int main()
 		cin >> input;
 		// Validate input, if not valid --j
 		if (1) {
-			temp.add(players[stoi(input)]);
+			temp.add_p(players[stoi(input)]);
 			cout << "\n";
 		}
 	}
@@ -133,7 +128,7 @@ int main()
 
 void printplay(const map<int, Player> &players) {
 	for (auto const &id:players) {
-			cout << "Id:" << id.first << ", " << id.second.m_name << ", " << id.second.m_elo << "\n";
+			cout << "Id:" << id.second.m_id << ", " << id.second.m_name << ", " << id.second.m_elo << "\n";
 	}
 }
 
@@ -161,8 +156,8 @@ void readfile(map<int, Player> &players) {
 			getline(f, elo);
 			temp.m_name = name;
 			temp.m_elo = stoi(elo);
-			temp.id = ++i;
-			if (name != "") players.insert(pair<int,Player>(temp.id,temp));
+			temp.m_id = ++i;
+			if (name != "") players.insert(pair<int,Player>(temp.m_id,temp));
 		}
 	}
 	f.close();
