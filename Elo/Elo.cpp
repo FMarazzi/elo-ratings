@@ -73,9 +73,14 @@ public:
 	pair<Team, Team> teams() {
 		return pair<Team,Team> (TeamA.first,TeamB.first);
 	};
-	int change_elo() {
+	int change_elo(map<int, Player> &players) {
+		// Change the "var" parameter in each team
 		TeamA.first.var += K*(W-TeamA.first.get_we(TeamB.first));
 		TeamB.first.var += K*((1-W)-TeamB.first.get_we(TeamA.first));
+
+		// Change the ELO of the players
+		TeamA.first.change_players(players);
+		TeamB.first.change_players(players);
 		return 0;
 	};
 };
@@ -87,20 +92,18 @@ void writefile(const map<int, Player> &players);
 int main()
 {	
 	map<int, Player> players;
-	Team temp;
-	vector<Team> teams;
-	Game game;
+	readfile(players); // Read data from file
+	printplay(players); // Print data out
 
-	teams.reserve(10);
-
-	readfile(players);
-	printplay(players);
-
+	// Choices for the user
 	string input;
 	cout << "To choose the teams type 0. For automatic team generation type 1.\n";
 	cin >> input;
 	// if (stoi(input)) gen_teams(); // Automatic generation
 	
+	// Create teams and add them to the vector
+	Team temp;
+	vector<Team> teams;
 	cout << "New team:\n";
 	for (int j = 0; j < 5; ++j) {
 		cout << "Player " << j << ": ";
@@ -114,12 +117,12 @@ int main()
 	}
 	teams.push_back(temp);
 		
+	
+	Game game; // Create game
+	//game.set_game(); // Set game's parameters (team1, goal1, team2, goal2)
+	game.change_elo(players); // change team's elo
 
-	cout << "Result:\n";
-	// insert results
-
-	// calculations
-	writefile(players);
+	writefile(players); // write out changes
 
 	cout << "Calculation and editing done.\n";
 	getchar();
