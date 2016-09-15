@@ -60,7 +60,7 @@ class Game {
 private:
 	pair<Team,short> TeamA;
 	pair<Team, short> TeamB;
-	float K = 20, W, Wea;
+	float K = 50, W, Wea;
 public:
 	int set_game(Team &A,short Ga,Team &B,short Gb) {
 		for (int i : A.members())
